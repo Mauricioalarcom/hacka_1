@@ -1,5 +1,6 @@
 package com.greenloop.sparky.User.domain;
 
+import com.greenloop.sparky.Empresa.domain.Empresa;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,6 +37,8 @@ public class UserAccount implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    //IMPLEMENTAR LA RELACION CON EMPRESA
+
 
 
     private Boolean expired;
@@ -45,6 +48,8 @@ public class UserAccount implements UserDetails {
     private Boolean credentialsExpired;
 
     private Boolean enable;
+
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
