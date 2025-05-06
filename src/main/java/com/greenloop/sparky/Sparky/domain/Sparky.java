@@ -1,13 +1,13 @@
 package com.greenloop.sparky.Sparky.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.greenloop.sparky.Empresa.domain.Empresa;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,4 +20,6 @@ public class Sparky {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @OneToMany(mappedBy = "sparky", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Empresa> empresas;
 }
