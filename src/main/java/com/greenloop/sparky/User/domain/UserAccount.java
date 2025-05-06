@@ -1,5 +1,6 @@
 package com.greenloop.sparky.User.domain;
 
+import com.greenloop.sparky.Empresa.domain.Empresa;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,7 +37,11 @@ public class UserAccount implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
 
+    private Integer limit;
 
     private Boolean expired;
 
