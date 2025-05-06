@@ -19,13 +19,13 @@ public class Solicitud {
     private Long SoliId;
 
     @Column(nullable = false)
-    private String infoConsulta;
+    private String consulta;
 
     @Column(nullable = false)
     private String respuesta;
 
     @Column(nullable = false)
-    private Integer ConsumoRecursos;
+    private Integer TokensConsumidos;
 
 
 

@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.ZonedDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -21,6 +23,19 @@ public class Empresa {
     @ManyToOne
     @JoinColumn(name = "sparky_id", nullable = false)
     private Sparky sparky;
+
+    @Column(nullable = false)
+    private String nombre;
+
+    @Column(nullable = false)
+    private Integer RUC;
+
+    @Column(nullable = false)
+    private ZonedDateTime fechaAfiliacion;
+
+    @Column(nullable = false)
+    private Estado estado;
+
 
 
 }
