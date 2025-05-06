@@ -21,4 +21,6 @@ public class Empresa {
     @ManyToOne
     @JoinColumn(name = "sparky_id", nullable = false)
     private Sparky sparky;
+
+
 }
