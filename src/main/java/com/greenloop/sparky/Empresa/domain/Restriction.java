@@ -22,4 +22,8 @@ public class Restriction {
 
     @Column(nullable = false)
     private Integer limit;
+
+    @ManyToOne
+    @JoinColumn(name = "empresa_id", nullable = false)
+    private Empresa empresa;
 }
