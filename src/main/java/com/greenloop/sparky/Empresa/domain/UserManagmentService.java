@@ -1,12 +1,11 @@
 package com.greenloop.sparky.Empresa.domain;
 
 import com.greenloop.sparky.Empresa.exceptions.ResourceNotFoundException;
+import com.greenloop.sparky.Empresa.exceptions.UnauthorizedAccessException;
 import com.greenloop.sparky.Empresa.infrastructure.EmpresaRepository;
 import com.greenloop.sparky.User.domain.UserAccount;
 import com.greenloop.sparky.User.domain.Role;
 import com.greenloop.sparky.User.infraestructure.UserAccountRepository;
-import com.greenloop.sparky.common.exception.UnauthorizedAccessException;
-import com.greenloop.sparky.common.exception.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
