@@ -2,6 +2,7 @@ package com.greenloop.sparky;
 
 
 import com.greenloop.sparky.Empresa.exceptions.*;
+import com.greenloop.sparky.restriction.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -63,5 +64,40 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    @ExceptionHandler(RestrictionNotFoundException.class)
+    public ResponseEntity<Object> handleRestrictionNotFoundException(RestrictionNotFoundException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(RestrictionDuplicateModelException.class)
+    public ResponseEntity<Object> handleRestrictionDuplicateModelException(RestrictionDuplicateModelException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(RestrictionNotOwnerException.class)
+    public ResponseEntity<Object> handleRestrictionNotOwnerException(RestrictionNotOwnerException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(InvalidRestrictionLimitException.class)
+    public ResponseEntity<Object> handleInvalidRestrictionLimitException(InvalidRestrictionLimitException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(RestrictionException.class)
+    public ResponseEntity<Object> handleRestrictionException(RestrictionException ex) {
+        return buildErrorResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    private ResponseEntity<Object> buildErrorResponse(String message, HttpStatus status) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now().toString());
+        body.put("status", status.value());
+        body.put("error", status.getReasonPhrase());
+        body.put("message", message);
+        return new ResponseEntity<>(body, status);
+    }
+
 
 }

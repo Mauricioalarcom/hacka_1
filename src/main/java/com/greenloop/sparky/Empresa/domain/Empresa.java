@@ -3,14 +3,13 @@ package com.greenloop.sparky.Empresa.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.greenloop.sparky.Sparky.domain.Sparky;
 import com.greenloop.sparky.User.domain.UserAccount;
+import com.greenloop.sparky.restriction.domain.Restriction;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.security.core.userdetails.User;
 
-import java.security.Principal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
