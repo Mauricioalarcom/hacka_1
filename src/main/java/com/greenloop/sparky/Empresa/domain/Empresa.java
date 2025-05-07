@@ -1,6 +1,7 @@
 package com.greenloop.sparky.Empresa.domain;
 
 import com.greenloop.sparky.Sparky.domain.Sparky;
+import com.greenloop.sparky.User.domain.Admin;
 import com.greenloop.sparky.User.domain.UserAccount;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -38,24 +39,17 @@ public class Empresa {
     @Column(nullable = false)
     private Estado estado;
 
-    /// FALTA MEJORAR LA RELACION CON EMPRESA
-    @OneToOne(mappedBy = "empresa")
-    private UserAccount administrator;
+    @OneToOne(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Admin administrator;
 
-    @OneToMany(mappedBy = "empresas")
+    @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
     private List<UserAccount> users;
 
-
-    @OneToMany(mappedBy = "empresa")
+    @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
     private List<Restriction> restrictions;
 
     @PrePersist
     public void prePersist() {
         this.fechaAfiliacion = ZonedDateTime.now();
     }
-
-
-
-
-
 }

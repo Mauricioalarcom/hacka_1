@@ -4,7 +4,10 @@ import com.greenloop.sparky.Empresa.domain.Empresa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
-    Long Id(Long id);
+
+    Optional<Empresa> findById(Long id);
 }
