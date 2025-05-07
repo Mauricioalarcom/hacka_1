@@ -34,6 +34,8 @@ public class Empresa {
     @Column(nullable = false)
     private String nombreEmpresa;
 
+    private String admin;
+
     @Column(nullable = false)
     private String ruc;
 
@@ -50,11 +52,10 @@ public class Empresa {
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
     private List<Restriction> restrictions;
 
-    private String admin;
+
 
     @PrePersist
     public void prePersist() {
-        this.admin = User.withUsername(this.nombreEmpresa).password("").roles("COMPANY_ADMIN").build().getUsername();
         this.fechaAfiliacion = ZonedDateTime.now();
     }
 }
