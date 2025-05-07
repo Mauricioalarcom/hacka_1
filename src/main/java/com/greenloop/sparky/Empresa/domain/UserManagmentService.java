@@ -6,6 +6,7 @@ import com.greenloop.sparky.Empresa.infrastructure.EmpresaRepository;
 import com.greenloop.sparky.User.domain.UserAccount;
 import com.greenloop.sparky.User.domain.Role;
 import com.greenloop.sparky.User.infraestructure.UserAccountRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,70 +16,60 @@ import java.util.List;
 @Transactional
 public class UserManagmentService {
 
-    private final UserAccountRepository userRepository;
-    private final EmpresaRepository empresaRepository;
+    @Autowired
+    private  UserAccountRepository userRepository;
+
+    @Autowired
+    private  EmpresaRepository empresaRepository;
 
     public UserManagmentService(UserAccountRepository userRepository, EmpresaRepository empresaRepository) {
         this.userRepository = userRepository;
         this.empresaRepository = empresaRepository;
     }
 
-    public UserAccount createUser(Long empresaId, UserAccount userAccount, UserAccount currentUser) {
+    public UserAccount createUser(UserAccount userAccount, UserAccount currentUser) {
         validateAdminAccess(currentUser);
-        Empresa empresa = empresaRepository.findById(empresaId)
-                .orElseThrow(() -> new ResourceNotFoundException("Empresa not found with id: " + empresaId));
-        
-        validateUserBelongsToEmpresa(currentUser, empresa.getId());
+        Empresa empresa = currentUser.getEmpresa(); // Get the empresa from the admin user
         userAccount.setEmpresa(empresa);
         return userRepository.save(userAccount);
     }
 
-    public List<UserAccount> getAllUsers(Long empresaId, UserAccount currentUser) {
-        validateUserBelongsToEmpresa(currentUser, empresaId);
-        return userRepository.findByEmpresaId(empresaId);
+    public List<UserAccount> getAllUsers(UserAccount currentUser) {
+        validateAdminAccess(currentUser);
+        return userRepository.findByEmpresaId(currentUser.getEmpresa().getId());
     }
 
-    public UserAccount getUserById(Long empresaId, Long id, UserAccount currentUser) {
-        validateUserBelongsToEmpresa(currentUser, empresaId);
-        return userRepository.findByIdAndEmpresaId(id, empresaId)
+    public UserAccount getUserById(Long id, UserAccount currentUser) {
+        validateAdminAccess(currentUser);
+        return userRepository.findByIdAndEmpresaId(id, currentUser.getEmpresa().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
 
-    public UserAccount updateUser(Long empresaId, Long id, UserAccount userAccount, UserAccount currentUser) {
+    public UserAccount updateUser(Long id, UserAccount userAccount, UserAccount currentUser) {
         validateAdminAccess(currentUser);
-        validateUserBelongsToEmpresa(currentUser, empresaId);
-        
-        UserAccount existingUser = getUserById(empresaId, id, currentUser);
+        UserAccount existingUser = getUserById(id, currentUser);
         existingUser.setName(userAccount.getName());
         existingUser.setEmail(userAccount.getEmail());
         existingUser.setRole(userAccount.getRole());
         return userRepository.save(existingUser);
     }
 
-    public UserAccount assignUserLimit(Long empresaId, Long id, Integer limit, UserAccount currentUser) {
+    public UserAccount assignUserLimit(Long id, Integer limit, UserAccount currentUser) {
         validateAdminAccess(currentUser);
-        validateUserBelongsToEmpresa(currentUser, empresaId);
-        
-        UserAccount user = getUserById(empresaId, id, currentUser);
+        UserAccount user = getUserById(id, currentUser);
         user.setLimit(limit);
         return userRepository.save(user);
     }
 
-    public String getUserConsumption(Long empresaId, Long id, UserAccount currentUser) {
-        validateUserBelongsToEmpresa(currentUser, empresaId);
-        getUserById(empresaId, id, currentUser); // Validate user exists
-        return "Consumption report for User ID: " + id + " in Empresa ID: " + empresaId;
+    public String getUserConsumption(Long id, UserAccount currentUser) {
+        validateAdminAccess(currentUser);
+        getUserById(id, currentUser); // Validate user exists
+        return "Consumption report for User ID: " + id + " in Empresa ID: " + currentUser.getEmpresa().getId();
     }
 
     private void validateAdminAccess(UserAccount user) {
         if (user == null || user.getRole() != Role.COMPANY_ADMIN) {
             throw new UnauthorizedAccessException("Only COMPANY_ADMIN users can perform this operation");
-        }
-    }
-
-    private void validateUserBelongsToEmpresa(UserAccount user, Long empresaId) {
-        if (user == null || !user.getEmpresa().getId().equals(empresaId)) {
-            throw new UnauthorizedAccessException("User does not have access to this empresa");
         }
     }
 }
