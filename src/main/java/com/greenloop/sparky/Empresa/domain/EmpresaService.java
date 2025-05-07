@@ -29,7 +29,7 @@ public class EmpresaService {
 
     public Empresa updateEmpresa(Long id, Empresa empresa) {
         Empresa existingEmpresa = getEmpresaById(id);
-        existingEmpresa.setNombre(empresa.getNombre());
+        existingEmpresa.setNombreEmpresa(empresa.getNombreEmpresa());
         existingEmpresa.setRuc(empresa.getRuc());
         existingEmpresa.setFechaAfiliacion(empresa.getFechaAfiliacion());
         existingEmpresa.setEstado(empresa.getEstado());

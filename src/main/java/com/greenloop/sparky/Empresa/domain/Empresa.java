@@ -1,5 +1,6 @@
 package com.greenloop.sparky.Empresa.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.greenloop.sparky.Sparky.domain.Sparky;
 import com.greenloop.sparky.User.domain.UserAccount;
 import jakarta.persistence.*;
@@ -7,7 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.userdetails.User;
 
+import java.security.Principal;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -25,10 +28,11 @@ public class Empresa {
 
     @ManyToOne
     @JoinColumn(name = "sparky_id")
+    @JsonIgnore
     private Sparky sparky;
 
     @Column(nullable = false)
-    private String nombre;
+    private String nombreEmpresa;
 
     @Column(nullable = false)
     private String ruc;
@@ -46,8 +50,11 @@ public class Empresa {
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
     private List<Restriction> restrictions;
 
+    private String admin;
+
     @PrePersist
     public void prePersist() {
+        this.admin = User.withUsername(this.nombreEmpresa).password("").roles("COMPANY_ADMIN").build().getUsername();
         this.fechaAfiliacion = ZonedDateTime.now();
     }
 }
