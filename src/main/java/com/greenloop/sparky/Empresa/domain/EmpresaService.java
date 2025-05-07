@@ -33,7 +33,7 @@ public class EmpresaService {
         existingEmpresa.setNombreEmpresa(empresa.getNombreEmpresa());
         existingEmpresa.setRuc(empresa.getRuc());
         existingEmpresa.setFechaAfiliacion(ZonedDateTime.now());
-        existingEmpresa.setEstado(empresa.getEstado());
+        existingEmpresa.setEstado(existingEmpresa.getEstado());
         return empresaRepository.save(existingEmpresa);
     }
 
