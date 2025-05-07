@@ -3,6 +3,7 @@ package com.greenloop.sparky.Empresa.domain;
 import com.greenloop.sparky.Empresa.exceptions.ResourceNotFoundException;
 import com.greenloop.sparky.Empresa.exceptions.UnauthorizedAccessException;
 import com.greenloop.sparky.Empresa.infrastructure.EmpresaRepository;
+import com.greenloop.sparky.User.domain.Admin;
 import com.greenloop.sparky.User.domain.UserAccount;
 import com.greenloop.sparky.User.domain.Role;
 import com.greenloop.sparky.User.infraestructure.UserAccountRepository;
@@ -27,12 +28,13 @@ public class UserManagmentService {
         this.empresaRepository = empresaRepository;
     }
 
-    public UserAccount createUser(UserAccount userAccount, UserAccount currentUser) {
-        validateAdminAccess(currentUser);
-        Empresa empresa = currentUser.getEmpresa(); // Get the empresa from the admin user
-        userAccount.setEmpresa(empresa);
+    public UserAccount createUser(Admin userAccount, UserAccount currentUser) {
+        validateAndGetAdmin(currentUser);
+        userAccount.setEmpresa(userAccount.getEmpresa());
         return userRepository.save(userAccount);
     }
+
+
 
     public List<UserAccount> getAllUsers(UserAccount currentUser) {
         validateAdminAccess(currentUser);
