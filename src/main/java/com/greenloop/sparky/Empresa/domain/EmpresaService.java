@@ -3,6 +3,7 @@ package com.greenloop.sparky.Empresa.domain;
 import com.greenloop.sparky.Empresa.infrastructure.EmpresaRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -31,7 +32,7 @@ public class EmpresaService {
         Empresa existingEmpresa = getEmpresaById(id);
         existingEmpresa.setNombreEmpresa(empresa.getNombreEmpresa());
         existingEmpresa.setRuc(empresa.getRuc());
-        existingEmpresa.setFechaAfiliacion(empresa.getFechaAfiliacion());
+        existingEmpresa.setFechaAfiliacion(ZonedDateTime.now());
         existingEmpresa.setEstado(empresa.getEstado());
         return empresaRepository.save(existingEmpresa);
     }
