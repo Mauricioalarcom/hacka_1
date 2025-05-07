@@ -5,6 +5,7 @@ import com.greenloop.sparky.Empresa.domain.EmpresaService;
 import com.greenloop.sparky.Empresa.domain.Estado;
 import com.greenloop.sparky.Empresa.exceptions.EmpresaNotFoundException;
 import com.greenloop.sparky.Empresa.exceptions.EmpresaValidationException;
+import com.greenloop.sparky.consumption.dto.ConsumptionReportDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -73,10 +74,12 @@ public class EmpresaController {
     }
 
     @GetMapping("/{id}/consumption")
-    public ResponseEntity<String> getEmpresaConsumption(@PathVariable Long id) {
+    public ResponseEntity<ConsumptionReportDTO> getEmpresaConsumption(@PathVariable Long id) {
         // Verificar primero si la empresa existe
         empresaService.getEmpresaById(id);
-        
-        return ResponseEntity.ok(empresaService.getEmpresaConsumption(id));
+
+        // Obtener reporte de consumo
+        return ResponseEntity.ok(empresaService.getEmpresaConsumptionReport(id));
     }
+
 }
