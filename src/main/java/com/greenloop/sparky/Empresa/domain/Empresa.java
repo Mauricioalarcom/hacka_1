@@ -20,7 +20,7 @@ public class Empresa {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long empresaId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "sparky_id", nullable = false)
