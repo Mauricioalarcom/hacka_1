@@ -38,6 +38,11 @@ public class UserAccount implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+
+    @Column(name = "user_limit")
     private Integer limit;
 
     private Boolean expired;

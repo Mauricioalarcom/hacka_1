@@ -1,8 +1,6 @@
 package com.greenloop.sparky.Empresa.domain;
 
 import com.greenloop.sparky.Sparky.domain.Sparky;
-import com.greenloop.sparky.User.domain.Admin;
-import com.greenloop.sparky.User.domain.Employee;
 import com.greenloop.sparky.User.domain.UserAccount;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -18,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "empresas")
 public class Empresa {
 
     @Id
@@ -40,11 +39,8 @@ public class Empresa {
     @Column(nullable = false)
     private Estado estado;
 
-    @OneToOne(mappedBy = "empresa", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Admin administrator;
-
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
-    private List<Employee> employees;
+    private List<UserAccount> usuarios;
 
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
     private List<Restriction> restrictions;

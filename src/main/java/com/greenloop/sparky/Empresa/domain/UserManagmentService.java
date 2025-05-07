@@ -3,11 +3,14 @@ package com.greenloop.sparky.Empresa.domain;
 import com.greenloop.sparky.Empresa.exceptions.ResourceNotFoundException;
 import com.greenloop.sparky.Empresa.exceptions.UnauthorizedAccessException;
 import com.greenloop.sparky.Empresa.infrastructure.EmpresaRepository;
-import com.greenloop.sparky.User.domain.Admin;
 import com.greenloop.sparky.User.domain.UserAccount;
 import com.greenloop.sparky.User.domain.Role;
 import com.greenloop.sparky.User.infraestructure.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,60 +21,154 @@ import java.util.List;
 public class UserManagmentService {
 
     @Autowired
-    private  UserAccountRepository userRepository;
+    private UserAccountRepository userRepository;
 
     @Autowired
-    private  EmpresaRepository empresaRepository;
+    private EmpresaRepository empresaRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+
 
     public UserManagmentService(UserAccountRepository userRepository, EmpresaRepository empresaRepository) {
         this.userRepository = userRepository;
         this.empresaRepository = empresaRepository;
     }
 
-    public UserAccount createUser(Admin userAccount, UserAccount currentUser) {
-        validateAndGetAdmin(currentUser);
-        userAccount.setEmpresa(userAccount.getEmpresa());
-        return userRepository.save(userAccount);
+    public UserAccount createUser(UserAccount newEmployee) {
+        UserAccount currentUser = getCurrentAdminUser();
+
+        newEmployee.setEmpresa(currentUser.getEmpresa());
+
+        newEmployee.setEnable(true);
+        newEmployee.setExpired(false);
+        newEmployee.setLocked(false);
+        newEmployee.setCredentialsExpired(false);
+
+        newEmployee.setRole(Role.USER);
+
+        if (newEmployee.getPassword() != null) {
+            newEmployee.setPassword(passwordEncoder.encode(newEmployee.getPassword()));
+        }
+
+        return userRepository.save(newEmployee);
     }
 
 
+    public List<UserAccount> getAllUsers() {
+        UserAccount currentUser = getCurrentAdminUser();
 
-    public List<UserAccount> getAllUsers(UserAccount currentUser) {
-        validateAdminAccess(currentUser);
         return userRepository.findByEmpresaId(currentUser.getEmpresa().getId());
     }
 
-    public UserAccount getUserById(Long id, UserAccount currentUser) {
-        validateAdminAccess(currentUser);
-        return userRepository.findByIdAndEmpresaId(id, currentUser.getEmpresa().getId())
+
+    public UserAccount getUserById(Long id) {
+        UserAccount currentUser = getCurrentAdminUser();
+
+        return (UserAccount) userRepository.findByIdAndEmpresaId(id, currentUser.getEmpresa().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
     }
 
-    public UserAccount updateUser(Long id, UserAccount userAccount, UserAccount currentUser) {
-        validateAdminAccess(currentUser);
-        UserAccount existingUser = getUserById(id, currentUser);
+    public UserAccount updateUser(Long id, UserAccount userAccount) {
+
+        UserAccount currentUser = getCurrentAdminUser();
+
+
+        UserAccount existingUser = (UserAccount) userRepository.findByIdAndEmpresaId(id, currentUser.getEmpresa().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
         existingUser.setName(userAccount.getName());
         existingUser.setEmail(userAccount.getEmail());
+
+        if (userAccount.getRole() == Role.COMPANY_ADMIN && existingUser.getRole() != Role.COMPANY_ADMIN) {
+            throw new UnauthorizedAccessException("Cannot upgrade a user to COMPANY_ADMIN");
+        }
+
         existingUser.setRole(userAccount.getRole());
+
+        if (userAccount.getExpired() != null) {
+            existingUser.setExpired(userAccount.getExpired());
+        }
+
+        if (userAccount.getLocked() != null) {
+            existingUser.setLocked(userAccount.getLocked());
+        }
+
+        if (userAccount.getEnable() != null) {
+            existingUser.setEnable(userAccount.getEnable());
+        }
+
+        if (userAccount.getCredentialsExpired() != null) {
+            existingUser.setCredentialsExpired(userAccount.getCredentialsExpired());
+        }
+
         return userRepository.save(existingUser);
     }
 
-    public UserAccount assignUserLimit(Long id, Integer limit, UserAccount currentUser) {
-        validateAdminAccess(currentUser);
-        UserAccount user = getUserById(id, currentUser);
+
+    public UserAccount assignUserLimit(Long id, Integer limit) {
+        // Verificar que el límite sea válido
+        if (limit != null && limit < 0) {
+            throw new IllegalArgumentException("User limit cannot be negative");
+        }
+
+        // Obtener el administrador actual
+        UserAccount currentUser = getCurrentAdminUser();
+
+        // Verificar que sea un Admin
+
+        // Buscar el usuario por ID y empresa
+        UserAccount user = (UserAccount) userRepository.findByIdAndEmpresaId(id, currentUser.getEmpresa().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        // Verificar que el usuario no sea otro administrador
+        if (user.getRole() == Role.COMPANY_ADMIN) {
+            throw new UnauthorizedAccessException("Cannot set limits for another company administrator");
+        }
+
+        // Establecer el nuevo límite y guardar
         user.setLimit(limit);
+
+        // Guardar y devolver el usuario actualizado
         return userRepository.save(user);
     }
 
-    public String getUserConsumption(Long id, UserAccount currentUser) {
-        validateAdminAccess(currentUser);
-        getUserById(id, currentUser); // Validate user exists
-        return "Consumption report for User ID: " + id + " in Empresa ID: " + currentUser.getEmpresa().getId();
-    }
+    //falta implementa getUserConsumption SERVICE /////
 
-    private void validateAdminAccess(UserAccount user) {
-        if (user == null || user.getRole() != Role.COMPANY_ADMIN) {
+    /**
+     * Gets the currently authenticated user and validates that they have a COMPANY_ADMIN role.
+     * 
+     * @return The authenticated user with the COMPANY_ADMIN role
+     * @throws UnauthorizedAccessException if the user is not authenticated or doesn't have a COMPANY_ADMIN role
+     */
+    private UserAccount getCurrentAdminUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnauthorizedAccessException("User not authenticated");
+        }
+        
+        UserAccount user;
+        Object principal = authentication.getPrincipal();
+        
+        // Si el principal es directamente un UserAccount
+        if (principal instanceof UserAccount) {
+            user = (UserAccount) principal;
+        } else {
+            // Si el principal es un nombre de usuario (email)
+            String email = authentication.getName();
+            user = userRepository.findByEmail(email);
+            
+            if (user == null) {
+                throw new UnauthorizedAccessException("User not found");
+            }
+        }
+        
+        // Validar que el usuario tiene rol COMPANY_ADMIN
+        if (user.getRole() != Role.COMPANY_ADMIN) {
             throw new UnauthorizedAccessException("Only COMPANY_ADMIN users can perform this operation");
         }
+        
+        return user;
     }
 }
