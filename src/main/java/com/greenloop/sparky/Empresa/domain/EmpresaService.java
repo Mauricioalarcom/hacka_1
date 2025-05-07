@@ -30,7 +30,7 @@ public class EmpresaService {
     public Empresa updateEmpresa(Long id, Empresa empresa) {
         Empresa existingEmpresa = getEmpresaById(id);
         existingEmpresa.setNombre(empresa.getNombre());
-        existingEmpresa.setRUC(empresa.getRUC());
+        existingEmpresa.setRuc(empresa.getRuc());
         existingEmpresa.setFechaAfiliacion(empresa.getFechaAfiliacion());
         existingEmpresa.setEstado(empresa.getEstado());
         return empresaRepository.save(existingEmpresa);

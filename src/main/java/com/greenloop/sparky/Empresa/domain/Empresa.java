@@ -24,19 +24,20 @@ public class Empresa {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "sparky_id", nullable = false)
+    @JoinColumn(name = "sparky_id")
     private Sparky sparky;
 
     @Column(nullable = false)
     private String nombre;
 
     @Column(nullable = false)
-    private Integer RUC;
+    private String ruc;
 
     @Column(nullable = false)
     private ZonedDateTime fechaAfiliacion;
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     private Estado estado;
 
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)

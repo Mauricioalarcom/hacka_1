@@ -20,7 +20,7 @@ public class Restriction {
     @Column(nullable = false)
     private String model;
 
-    @Column(nullable = false)
+    @Column(name = "restriction_limit", nullable = false)
     private Integer limit;
 
     @ManyToOne
