@@ -1,8 +1,11 @@
 package com.greenloop.sparky.Empresa.domain;
 
+import com.greenloop.sparky.Empresa.exceptions.UnauthorizedAccessException;
 import com.greenloop.sparky.Empresa.infrastructure.EmpresaRepository;
+import com.greenloop.sparky.User.domain.Role;
 import com.greenloop.sparky.User.domain.UserAccount;
 import com.greenloop.sparky.User.infraestructure.UserAccountRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -11,6 +14,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
+@Transactional
 public class EmpresaService {
 
     private final EmpresaRepository empresaRepository;
@@ -25,26 +29,51 @@ public class EmpresaService {
         // Obtener el usuario autenticado actual
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication != null && authentication.isAuthenticated()) {
-            UserAccount currentUser = null;
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new UnauthorizedAccessException("User not authenticated");
+        }
 
-            // Obtener el usuario según el tipo de principal
-            if (authentication.getPrincipal() instanceof UserAccount) {
-                currentUser = (UserAccount) authentication.getPrincipal();
-            } else {
-                String email = authentication.getName();
-                currentUser = userAccountRepository.findByEmail(email);
-            }
+        UserAccount currentUser = null;
 
-            // Asignar el nombre del administrador si se encontró el usuario
-            if (currentUser != null) {
-                empresa.setAdmin(currentUser.getName());
+        // Obtener el usuario según el tipo de principal
+        if (authentication.getPrincipal() instanceof UserAccount) {
+            currentUser = (UserAccount) authentication.getPrincipal();
+            // Recargar para asegurar datos actualizados
+            currentUser = userAccountRepository.findById(currentUser.getId())
+                    .orElseThrow(() -> new UnauthorizedAccessException("User not found"));
+        } else {
+            String email = authentication.getName();
+            currentUser = userAccountRepository.findByEmail(email);
+
+            if (currentUser == null) {
+                throw new UnauthorizedAccessException("User not found");
             }
         }
 
-        // Resto de la lógica de creación
-        return empresaRepository.save(empresa);
+        // Verificar que el usuario tenga rol de COMPANY_ADMIN
+        if (currentUser.getRole() != Role.COMPANY_ADMIN) {
+            throw new UnauthorizedAccessException("Only administrators can create companies");
+        }
+
+        // Verificar que el administrador no tenga ya una empresa asociada
+        List<Empresa> existingCompanies = empresaRepository.findByAdministradorId(currentUser.getId());
+        if (!existingCompanies.isEmpty()) {
+            throw new IllegalStateException("Administrator already has a company associated. Cannot create more than one company per administrator.");
+        }
+
+        // Establecer el administrador en la empresa
+        empresa.setAdministrador(currentUser);
+
+        // Guardar la empresa
+        Empresa savedEmpresa = empresaRepository.save(empresa);
+
+        // Asignar la empresa al administrador para completar la relación bidireccional
+        currentUser.setEmpresa(savedEmpresa);
+        userAccountRepository.save(currentUser);
+
+        return savedEmpresa;
     }
+
 
 
     public List<Empresa> getAllEmpresas() {

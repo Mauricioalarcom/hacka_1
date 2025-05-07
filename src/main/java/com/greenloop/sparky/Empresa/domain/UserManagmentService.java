@@ -38,20 +38,23 @@ public class UserManagmentService {
 
     public UserAccount createUser(UserAccount newEmployee) {
         UserAccount currentUser = getCurrentAdminUser();
-
+        
+        // Verificar que el usuario actual tenga una empresa
+        if (currentUser.getEmpresa() == null) {
+            throw new ResourceNotFoundException("Cannot create user: current admin does not have an associated company");
+        }
+        
         newEmployee.setEmpresa(currentUser.getEmpresa());
-
         newEmployee.setEnable(true);
         newEmployee.setExpired(false);
         newEmployee.setLocked(false);
         newEmployee.setCredentialsExpired(false);
-
         newEmployee.setRole(Role.USER);
-
+        
         if (newEmployee.getPassword() != null) {
             newEmployee.setPassword(passwordEncoder.encode(newEmployee.getPassword()));
         }
-
+        
         return userRepository.save(newEmployee);
     }
 
@@ -154,6 +157,10 @@ public class UserManagmentService {
         // Si el principal es directamente un UserAccount
         if (principal instanceof UserAccount) {
             user = (UserAccount) principal;
+            // Si el objeto ya está en el contexto de seguridad, podría no tener todos los datos cargados
+            // Recargar desde la base de datos para asegurar que la empresa esté cargada
+            user = userRepository.findById(user.getId())
+                .orElseThrow(() -> new UnauthorizedAccessException("User not found"));
         } else {
             // Si el principal es un nombre de usuario (email)
             String email = authentication.getName();
@@ -167,6 +174,11 @@ public class UserManagmentService {
         // Validar que el usuario tiene rol COMPANY_ADMIN
         if (user.getRole() != Role.COMPANY_ADMIN) {
             throw new UnauthorizedAccessException("Only COMPANY_ADMIN users can perform this operation");
+        }
+
+        // Verificar que el usuario tenga una empresa asignada
+        if (user.getEmpresa() == null) {
+            throw new ResourceNotFoundException("The current user does not have an associated company");
         }
         
         return user;

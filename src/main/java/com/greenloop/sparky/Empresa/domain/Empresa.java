@@ -46,6 +46,10 @@ public class Empresa {
     @Enumerated(EnumType.STRING)
     private Estado estado;
 
+    @OneToOne
+    @JoinColumn(name = "admin_id", unique = true)
+    private UserAccount administrador;
+
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
     private List<UserAccount> usuarios;
 

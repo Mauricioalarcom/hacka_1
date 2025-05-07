@@ -2,6 +2,7 @@ package com.greenloop.sparky.Jwt;
 
 import com.greenloop.sparky.Jwt.dto.JwtAuthenticationResponse;
 import com.greenloop.sparky.Jwt.dto.SigninRequest;
+import com.greenloop.sparky.User.domain.Role;
 import com.greenloop.sparky.User.domain.UserAccount;
 import com.greenloop.sparky.User.infraestructure.UserAccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,11 @@ public class AuthenticationService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         userRepository.save(user);
+
+        if (user.getRole() == Role.COMPANY_ADMIN) {
+            user.setEmpresa(null); // El admin creará una empresa después
+        }
+
         var jwt = jwtService.generateToken(user);
 
         JwtAuthenticationResponse response = new JwtAuthenticationResponse();
