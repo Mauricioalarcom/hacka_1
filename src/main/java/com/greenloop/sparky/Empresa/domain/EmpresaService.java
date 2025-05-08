@@ -32,7 +32,6 @@ public class EmpresaService {
     }
 
     public Empresa createEmpresa(Empresa empresa) {
-        // Obtener el usuario autenticado actual
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -41,10 +40,8 @@ public class EmpresaService {
 
         UserAccount currentUser = null;
 
-        // Obtener el usuario según el tipo de principal
         if (authentication.getPrincipal() instanceof UserAccount) {
             currentUser = (UserAccount) authentication.getPrincipal();
-            // Recargar para asegurar datos actualizados
             currentUser = userAccountRepository.findById(currentUser.getId())
                     .orElseThrow(() -> new UnauthorizedAccessException("User not found"));
         } else {
@@ -55,25 +52,19 @@ public class EmpresaService {
                 throw new UnauthorizedAccessException("User not found");
             }
         }
-
-        // Verificar que el usuario tenga rol de COMPANY_ADMIN
         if (currentUser.getRole() != Role.COMPANY_ADMIN) {
             throw new UnauthorizedAccessException("Only administrators can create companies");
         }
 
-        // Verificar que el administrador no tenga ya una empresa asociada
         List<Empresa> existingCompanies = empresaRepository.findByAdministradorId(currentUser.getId());
         if (!existingCompanies.isEmpty()) {
             throw new IllegalStateException("Administrator already has a company associated. Cannot create more than one company per administrator.");
         }
 
-        // Establecer el administrador en la empresa
         empresa.setAdministrador(currentUser);
 
-        // Guardar la empresa
         Empresa savedEmpresa = empresaRepository.save(empresa);
 
-        // Asignar la empresa al administrador para completar la relación bidireccional
         currentUser.setEmpresa(savedEmpresa);
         userAccountRepository.save(currentUser);
 
@@ -135,7 +126,6 @@ public class EmpresaService {
         Empresa empresa = getEmpresaById(empresaId);
         ConsumptionReportDTO report = getEmpresaConsumptionReport(empresaId);
 
-        // Construir un prompt para la IA
         String prompt = String.format(
                 "Analiza el consumo energético de la empresa '%s' con ID %d. " +
                         "La empresa tiene %d créditos totales, ha gastado %d y tiene disponibles %d. " +
@@ -149,7 +139,6 @@ public class EmpresaService {
                 report.getConsumoPorModelo().toString()
         );
 
-        // Usar el servicio de IA para analizar
         return chatAIService.chat(prompt);
     }
 

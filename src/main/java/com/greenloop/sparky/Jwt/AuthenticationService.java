@@ -31,7 +31,7 @@ public class AuthenticationService {
         userRepository.save(user);
 
         if (user.getRole() == Role.COMPANY_ADMIN) {
-            user.setEmpresa(null); // El admin creará una empresa después
+            user.setEmpresa(null);
         }
 
         var jwt = jwtService.generateToken(user);

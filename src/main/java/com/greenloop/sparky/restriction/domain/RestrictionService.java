@@ -27,12 +27,10 @@ public class RestrictionService {
             throw new RuntimeException("Empresa no encontrada con ID: " + empresaId);
         }
 
-        // Verificar que el modelo no esté duplicado
         if (restrictionRepository.existsByModelAndEmpresaId(restriction.getModel(), empresaId)) {
             throw new RestrictionDuplicateModelException(restriction.getModel());
         }
 
-        // Verificar que el límite sea válido
         if (restriction.getLimit() <= 0) {
             throw new InvalidRestrictionLimitException(restriction.getLimit());
         }
@@ -54,23 +52,19 @@ public class RestrictionService {
         Restriction existingRestriction = restrictionRepository.findById(id)
                 .orElseThrow(() -> new RestrictionNotFoundException(id));
 
-        // Verificar que la restricción pertenezca a la empresa correcta
         if (!existingRestriction.getEmpresa().getId().equals(empresaId)) {
             throw new RestrictionNotOwnerException(id, empresaId);
         }
 
-        // Verificar que si cambia el modelo, no esté duplicado
         if (!existingRestriction.getModel().equals(restriction.getModel()) &&
                 restrictionRepository.existsByModelAndEmpresaId(restriction.getModel(), empresaId)) {
             throw new RestrictionDuplicateModelException(restriction.getModel());
         }
 
-        // Verificar que el límite sea válido
         if (restriction.getLimit() <= 0) {
             throw new InvalidRestrictionLimitException(restriction.getLimit());
         }
 
-        // Actualizar campos
         existingRestriction.setModel(restriction.getModel());
         existingRestriction.setLimit(restriction.getLimit());
 
@@ -82,7 +76,6 @@ public class RestrictionService {
         Restriction restriction = restrictionRepository.findById(id)
                 .orElseThrow(() -> new RestrictionNotFoundException(id));
 
-        // Verificar que la restricción pertenezca a la empresa correcta
         if (!restriction.getEmpresa().getId().equals(empresaId)) {
             throw new RestrictionNotOwnerException(id, empresaId);
         }

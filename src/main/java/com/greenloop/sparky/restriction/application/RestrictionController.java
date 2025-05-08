@@ -23,10 +23,7 @@ public class RestrictionController {
     }
 
     private Long getCurrentEmpresaId() {
-        // Esta implementación dependerá de tu sistema de autenticación
-        // Podría obtener el usuario actual y luego su empresa
-        // Por ahora, simulamos esto
-        // En un sistema real, obtendrías esto de la autenticación/sesión
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserAccount userAccount = (UserAccount) authentication.getPrincipal();
         return userAccount.getEmpresa().getId();
