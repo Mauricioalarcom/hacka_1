@@ -4,6 +4,7 @@ import com.azure.ai.inference.ChatCompletionsClient;
 import com.azure.ai.inference.ChatCompletionsClientBuilder;
 import com.azure.ai.inference.models.*;
 import com.azure.core.credential.AzureKeyCredential;
+import lombok.Getter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,9 +18,11 @@ import java.io.BufferedInputStream;
 @Service
 public class ChatAIService {
     private final ChatCompletionsClient client;
+    // Obtener historial de solicitudes
+    @Getter
     private final List<AIRequest> requestHistory = new ArrayList<>();
-    
-    // Modelos disponibles
+
+    @Getter
     private final List<AIModel> availableModels = Arrays.asList(
         new AIModel("openai/gpt-4.1-nano", "Modelo ligero para tareas generales de texto", Arrays.asList("text")),
         new AIModel("openai/gpt-4o", "Modelo avanzado para tareas complejas de texto", Arrays.asList("text")),
@@ -109,61 +112,53 @@ public class ChatAIService {
         return response;
     }
     
-    // Método para consultas multimodales (con imagen)
+
     public String multimodalQuery(String prompt, MultipartFile imageFile) throws IOException {
-        // Convertir la imagen a Base64
+        // Convert image to Base64
         String base64Image = convertToBase64(imageFile);
-        
-        // Crear contenidos para el mensaje multimodal
-        List<ChatRequestMessageContentItem> contentItems = new ArrayList<>();
-        
-        // Añadir el texto del prompt
-        contentItems.add(new ChatRequestMessageTextContentItem(prompt));
-        
-        // Añadir la imagen
-        Map<String, String> imageMetadata = new HashMap<>();
-        imageMetadata.put("url", base64Image);
-        
-        ChatRequestMessageImageUrl imageUrl = new ChatRequestMessageImageUrl()
-            .setUrl(base64Image);
-        
-        ChatRequestMessageImageContent imageContent = new ChatRequestMessageImageContent()
-            .setImageUrl(imageUrl);
-        
-        contentItems.add(imageContent);
-        
-        // Crear los mensajes para la solicitud
-        List<ChatRequestMessage> messages = Arrays.asList(
-            new ChatRequestSystemMessage("You are a helpful assistant that can analyze images and text."),
-            new ChatRequestUserMessage(contentItems)
+
+        // Create messages for the request
+        List<ChatRequestMessage> messages = new ArrayList<>();
+
+        // Add system message
+        messages.add(new ChatRequestSystemMessage("You are a helpful assistant that can analyze images and text."));
+
+        // Create user message with text and image reference
+        // Format the content as JSON with text and image URL
+        String content = String.format(
+                "{ \"type\": \"text\", \"text\": \"%s\" }\n{ \"type\": \"image_url\", \"image_url\": { \"url\": \"%s\" } }",
+                prompt.replace("\"", "\\\""),
+                base64Image.replace("\"", "\\\"")
         );
-        
-        // Configurar la solicitud
+
+        messages.add(new ChatRequestUserMessage(content));
+
+        // Configure the request
         ChatCompletionsOptions options = new ChatCompletionsOptions(messages);
-        String model = "anthropic/claude-3-opus"; // Modelo que soporta imágenes
+        String model = "anthropic/claude-3-opus"; // Model supporting images
         options.setModel(model);
-        
-        // Realizar la solicitud
+
+        // Make the request
         ChatCompletions completions = client.complete(options);
         String response = "";
-        
+
         if (completions.getChoices() != null && !completions.getChoices().isEmpty()) {
             response = completions.getChoices().get(0).getMessage().getContent();
         } else {
             response = "No se recibieron respuestas del modelo.";
         }
-        
-        // Guardar en historial
+
+        // Save to history
         requestHistory.add(new AIRequest(
-            UUID.randomUUID(),
-            LocalDateTime.now(),
-            "multimodal",
-            model,
-            prompt,
-            response,
-            imageFile.getOriginalFilename()
+                UUID.randomUUID(),
+                LocalDateTime.now(),
+                "multimodal",
+                model,
+                prompt,
+                response,
+                imageFile.getOriginalFilename()
         ));
-        
+
         return response;
     }
     
@@ -181,14 +176,5 @@ public class ChatAIService {
         byte[] fileBytes = outputStream.toByteArray();
         return "data:" + file.getContentType() + ";base64," + Base64.getEncoder().encodeToString(fileBytes);
     }
-    
-    // Obtener modelos disponibles
-    public List<AIModel> getAvailableModels() {
-        return availableModels;
-    }
-    
-    // Obtener historial de solicitudes
-    public List<AIRequest> getRequestHistory() {
-        return requestHistory;
-    }
+
 }
