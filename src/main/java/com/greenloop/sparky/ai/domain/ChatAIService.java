@@ -31,7 +31,7 @@ public class ChatAIService {
     );
 
     public ChatAIService() {
-        String key = "GITHUB_TOKEN_PLACEHOLDER";
+        String key = "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"; // no me permitia guardarlo en el env
         String endpoint = "https://models.github.ai/inference";
 
         this.client = new ChatCompletionsClientBuilder()
