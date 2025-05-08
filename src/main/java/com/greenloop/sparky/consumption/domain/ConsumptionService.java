@@ -22,17 +22,17 @@ import java.util.stream.Collectors;
 @Service
 public class ConsumptionService {
 
-    private final ConsumptionRepository consumptionRepository;
+    private static ConsumptionRepository consumptionRepository = null;
     private final EmpresaService empresaService;
-    private final UserAccountService userService;
+    private static UserAccountService userService = null;
 
     public ConsumptionService(
             ConsumptionRepository consumptionRepository,
             EmpresaService empresaService,
             UserAccountService userService) {
-        this.consumptionRepository = consumptionRepository;
+        ConsumptionService.consumptionRepository = consumptionRepository;
         this.empresaService = empresaService;
-        this.userService = userService;
+        ConsumptionService.userService = userService;
     }
 
     @Transactional
@@ -153,7 +153,7 @@ public class ConsumptionService {
     }
 
 
-    public Map<String, Object> getUserConsumptionReport(Long userId) {
+    public static Map<String, Object> getUserConsumptionReport(Long userId) {
         UserAccount user = userService.getUserById(userId);
         if (user == null) {
             throw new ConsumptionException("Usuario no encontrado con ID: " + userId);
@@ -218,27 +218,27 @@ public class ConsumptionService {
 
     private void validateConsumption(Consumption consumption) {
         if (consumption.getEmpresa() == null) {
-            throw new com.greenloop.sparky.consumption.exceptions.ConsumptionException("La empresa no puede ser nula");
+            throw new ConsumptionException("La empresa no puede ser nula");
         }
         
         if (consumption.getUser() == null) {
-            throw new com.greenloop.sparky.consumption.exceptions.ConsumptionException("El usuario no puede ser nulo");
+            throw new ConsumptionException("El usuario no puede ser nulo");
         }
         
         if (consumption.getModelType() == null || consumption.getModelType().trim().isEmpty()) {
-            throw new com.greenloop.sparky.consumption.exceptions.ConsumptionException("El tipo de modelo no puede estar vacío");
+            throw new ConsumptionException("El tipo de modelo no puede estar vacío");
         }
         
         if (consumption.getModelName() == null || consumption.getModelName().trim().isEmpty()) {
-            throw new com.greenloop.sparky.consumption.exceptions.ConsumptionException("El nombre del modelo no puede estar vacío");
+            throw new ConsumptionException("El nombre del modelo no puede estar vacío");
         }
         
         if (consumption.getTokensConsumed() == null || consumption.getTokensConsumed() < 0) {
-            throw new com.greenloop.sparky.consumption.exceptions.ConsumptionException("Los tokens consumidos deben ser un valor válido");
+            throw new ConsumptionException("Los tokens consumidos deben ser un valor válido");
         }
         
         if (consumption.getCost() == null || consumption.getCost() < 0) {
-            throw new com.greenloop.sparky.consumption.exceptions.ConsumptionException("El costo debe ser un valor válido");
+            throw new ConsumptionException("El costo debe ser un valor válido");
         }
     }
 }

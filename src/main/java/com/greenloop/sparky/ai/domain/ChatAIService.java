@@ -18,7 +18,7 @@ import java.io.BufferedInputStream;
 @Service
 public class ChatAIService {
     private final ChatCompletionsClient client;
-    // Obtener historial de solicitudes
+
     @Getter
     private final List<AIRequest> requestHistory = new ArrayList<>();
 
@@ -117,14 +117,13 @@ public class ChatAIService {
         // Convert image to Base64
         String base64Image = convertToBase64(imageFile);
 
-        // Create messages for the request
+
         List<ChatRequestMessage> messages = new ArrayList<>();
 
-        // Add system message
+
         messages.add(new ChatRequestSystemMessage("You are a helpful assistant that can analyze images and text."));
 
-        // Create user message with text and image reference
-        // Format the content as JSON with text and image URL
+
         String content = String.format(
                 "{ \"type\": \"text\", \"text\": \"%s\" }\n{ \"type\": \"image_url\", \"image_url\": { \"url\": \"%s\" } }",
                 prompt.replace("\"", "\\\""),
@@ -133,12 +132,12 @@ public class ChatAIService {
 
         messages.add(new ChatRequestUserMessage(content));
 
-        // Configure the request
+
         ChatCompletionsOptions options = new ChatCompletionsOptions(messages);
-        String model = "anthropic/claude-3-opus"; // Model supporting images
+        String model = "anthropic/claude-3-opus";
         options.setModel(model);
 
-        // Make the request
+
         ChatCompletions completions = client.complete(options);
         String response = "";
 
@@ -148,7 +147,7 @@ public class ChatAIService {
             response = "No se recibieron respuestas del modelo.";
         }
 
-        // Save to history
+
         requestHistory.add(new AIRequest(
                 UUID.randomUUID(),
                 LocalDateTime.now(),
@@ -161,8 +160,7 @@ public class ChatAIService {
 
         return response;
     }
-    
-    // Método para convertir archivos a Base64
+
     private String convertToBase64(MultipartFile file) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         BufferedInputStream inputStream = new BufferedInputStream(file.getInputStream());

@@ -6,6 +6,7 @@ import com.greenloop.sparky.Empresa.infrastructure.EmpresaRepository;
 import com.greenloop.sparky.User.domain.UserAccount;
 import com.greenloop.sparky.User.domain.Role;
 import com.greenloop.sparky.User.infraestructure.UserAccountRepository;
+import com.greenloop.sparky.consumption.domain.ConsumptionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -39,7 +41,6 @@ public class UserManagmentService {
     public UserAccount createUser(UserAccount newEmployee) {
         UserAccount currentUser = getCurrentAdminUser();
         
-        // Verificar que el usuario actual tenga una empresa
         if (currentUser.getEmpresa() == null) {
             throw new ResourceNotFoundException("Cannot create user: current admin does not have an associated company");
         }
@@ -111,29 +112,22 @@ public class UserManagmentService {
 
 
     public UserAccount assignUserLimit(Long id, Integer limit) {
-        // Verificar que el límite sea válido
         if (limit != null && limit < 0) {
             throw new IllegalArgumentException("User limit cannot be negative");
         }
 
-        // Obtener el administrador actual
         UserAccount currentUser = getCurrentAdminUser();
 
-        // Verificar que sea un Admin
 
-        // Buscar el usuario por ID y empresa
         UserAccount user = (UserAccount) userRepository.findByIdAndEmpresaId(id, currentUser.getEmpresa().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        // Verificar que el usuario no sea otro administrador
         if (user.getRole() == Role.COMPANY_ADMIN) {
             throw new UnauthorizedAccessException("Cannot set limits for another company administrator");
         }
 
-        // Establecer el nuevo límite y guardar
         user.setLimit(limit);
 
-        // Guardar y devolver el usuario actualizado
         return userRepository.save(user);
     }
 
@@ -153,16 +147,13 @@ public class UserManagmentService {
         
         UserAccount user;
         Object principal = authentication.getPrincipal();
-        
-        // Si el principal es directamente un UserAccount
+
         if (principal instanceof UserAccount) {
             user = (UserAccount) principal;
-            // Si el objeto ya está en el contexto de seguridad, podría no tener todos los datos cargados
-            // Recargar desde la base de datos para asegurar que la empresa esté cargada
+
             user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new UnauthorizedAccessException("User not found"));
         } else {
-            // Si el principal es un nombre de usuario (email)
             String email = authentication.getName();
             user = userRepository.findByEmail(email);
             
@@ -170,8 +161,7 @@ public class UserManagmentService {
                 throw new UnauthorizedAccessException("User not found");
             }
         }
-        
-        // Validar que el usuario tiene rol COMPANY_ADMIN
+
         if (user.getRole() != Role.COMPANY_ADMIN) {
             throw new UnauthorizedAccessException("Only COMPANY_ADMIN users can perform this operation");
         }
@@ -183,4 +173,58 @@ public class UserManagmentService {
         
         return user;
     }
+    /**
+     * Obtiene información detallada sobre el consumo de IA del usuario
+     * incluyendo tokens consumidos, costo, y detalle por modelo de IA
+     *
+     * @param id ID del usuario
+     * @param currentUser Usuario autenticado realizando la consulta
+     * @return String con información formateada del consumo o un objeto JSON según necesidad
+     */
+    public String getUserConsumption(Long id, UserAccount currentUser) {
+        if (currentUser.getEmpresa() == null) {
+            throw new ResourceNotFoundException("Cannot get user consumption: current user does not have an associated company");
+        }
+
+        UserAccount user = (UserAccount) userRepository.findByIdAndEmpresaId(id, currentUser.getEmpresa().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+
+        if (!currentUser.getId().equals(user.getId()) && currentUser.getRole() != Role.COMPANY_ADMIN) {
+            throw new UnauthorizedAccessException("You can only view your own consumption or you need COMPANY_ADMIN role");
+        }
+
+        Map<String, Object> consumptionReport = ConsumptionService.getUserConsumptionReport(id);
+
+        StringBuilder response = new StringBuilder();
+        response.append("Consumo de IA para ").append(user.getName()).append(":\n");
+        response.append("- Límite asignado: ").append(user.getLimit() != null ? user.getLimit() : "Ilimitado").append(" tokens\n");
+        response.append("- Tokens totales consumidos: ").append(consumptionReport.get("totalTokens")).append("\n");
+        response.append("- Costo total: $").append(String.format("%.2f", consumptionReport.get("totalCost"))).append("\n");
+
+        response.append("- Distribución por modelo:\n");
+
+        @SuppressWarnings("unchecked")
+        Map<String, Integer> tokensByModel = (Map<String, Integer>) consumptionReport.get("tokensByModel");
+        tokensByModel.forEach((model, tokens) -> {
+            response.append("  * ").append(model).append(": ").append(tokens).append(" tokens\n");
+        });
+
+        if (user.getLimit() != null) {
+            int totalTokens = (int) consumptionReport.get("totalTokens");
+            double usagePercentage = (double) totalTokens / user.getLimit() * 100;
+
+            if (usagePercentage >= 100) {
+                response.append("\n⚠️ El usuario ha excedido su límite asignado (")
+                        .append(String.format("%.1f", usagePercentage))
+                        .append("%)");
+            } else if (usagePercentage >= 80) {
+                response.append("\n⚠️ El usuario está cerca de alcanzar su límite (")
+                        .append(String.format("%.1f", usagePercentage))
+                        .append("%)");
+            }
+        }
+
+        return response.toString();
+    }
+
 }

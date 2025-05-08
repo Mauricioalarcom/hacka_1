@@ -55,11 +55,11 @@ public class UserManagmentController {
         return ResponseEntity.ok(userManagmentService.assignUserLimit(id, limit));
     }
 
-//    @GetMapping("/{id}/consumption")
-//    @PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'USER')")
-//    public ResponseEntity<String> getUserConsumption(
-//            @PathVariable Long id,
-//            @AuthenticationPrincipal UserAccount currentUser) {
-//        return ResponseEntity.ok(userManagmentService.getUserConsumption(id, currentUser));
-//    }
+    @GetMapping("/{id}/consumption")
+    @PreAuthorize("hasAnyRole('COMPANY_ADMIN', 'USER')")
+    public ResponseEntity<String> getUserConsumption(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserAccount currentUser) {
+        return ResponseEntity.ok(userManagmentService.getUserConsumption(id, currentUser));
+    }
 }
