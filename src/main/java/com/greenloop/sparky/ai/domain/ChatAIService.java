@@ -31,7 +31,7 @@ public class ChatAIService {
     );
 
     public ChatAIService() {
-        String key = "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"; // no me permitia guardarlo en el env
+        String key = "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"; // no me permitia guardarlo en el env
         String endpoint = "https://models.github.ai/inference";
 
         this.client = new ChatCompletionsClientBuilder()
