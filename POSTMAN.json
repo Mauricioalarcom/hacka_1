@@ -152,7 +152,7 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/admin/companies/1/status?estado=INACTIVO",
+              "raw": "{{base_url}}/api/admin/companies/1/status?estado=INACTIVE",
               "host": ["{{base_url}}"],
               "path": ["api", "admin", "companies", "1", "status"],
               "query": [
