@@ -78,7 +78,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"nombreEmpresa\": \"Empresa Test\",\n    \"ruc\": \"12345678901\",\n    \"fechaAfiliacion\": \"2023-04-15\",\n    \"estado\": \"ACTIVO\"\n}"
+              "raw": "{\n    \"nombreEmpresa\": \"Empresa Test\",\n    \"ruc\": \"12345678901\",\n    \"estado\": \"ACTIVE\"\n}"
             }
           }
         },
