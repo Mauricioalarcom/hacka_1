@@ -176,7 +176,7 @@ public class UserManagmentService {
             throw new UnauthorizedAccessException("Only COMPANY_ADMIN users can perform this operation");
         }
 
-        // Verificar que el usuario tenga una empresa asignada
+
         if (user.getEmpresa() == null) {
             throw new ResourceNotFoundException("The current user does not have an associated company");
         }

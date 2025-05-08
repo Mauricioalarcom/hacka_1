@@ -31,7 +31,7 @@ public class ChatAIService {
     );
 
     public ChatAIService() {
-        String key = System.getenv("AZURE_KEY");
+        String key = "GITHUB_TOKEN_PLACEHOLDER";
         String endpoint = "https://models.github.ai/inference";
 
         this.client = new ChatCompletionsClientBuilder()
