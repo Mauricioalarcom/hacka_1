@@ -1,5 +1,7 @@
 package com.greenloop.sparky.User.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.greenloop.sparky.Empresa.domain.Empresa;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -40,18 +42,19 @@ public class UserAccount implements UserDetails {
 
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "empresa_id")
+    @JsonBackReference
     private Empresa empresa;
 
     @Column(name = "user_limit")
     private Integer limit;
 
-    private Boolean expired;
+    private Boolean expired = Boolean.FALSE;
 
-    private Boolean locked;
+    private Boolean locked = Boolean.FALSE;
 
-    private Boolean credentialsExpired;
+    private Boolean credentialsExpired = Boolean.FALSE;
 
-    private Boolean enable;
+    private Boolean enable = Boolean.TRUE;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

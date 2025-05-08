@@ -1,6 +1,7 @@
 package com.greenloop.sparky.Empresa.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.greenloop.sparky.Sparky.domain.Sparky;
 import com.greenloop.sparky.User.domain.UserAccount;
 import com.greenloop.sparky.restriction.domain.Restriction;
@@ -47,9 +48,11 @@ public class Empresa {
 
     @OneToOne
     @JoinColumn(name = "admin_id", unique = true)
+    @JsonManagedReference
     private UserAccount administrador;
 
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<UserAccount> usuarios;
 
     @OneToMany(mappedBy = "empresa", cascade = CascadeType.ALL)
