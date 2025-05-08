@@ -208,7 +208,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"modeloAI\": \"GPT-4\",\n    \"limiteUso\": 100,\n    \"ventanaTiempo\": \"DIARIO\"\n}"
+              "raw": "{\n    \"model\": \"GPT-4\",\n    \"limit\": 100,\n}"
             }
           }
         },
@@ -250,7 +250,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"modeloAI\": \"GPT-4\",\n    \"limiteUso\": 150,\n    \"ventanaTiempo\": \"SEMANAL\"\n}"
+              "raw": "{\n    \"model\": \"GPT-4\",\n    \"limit\": 150,\n}"
             }
           }
         },
