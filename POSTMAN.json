@@ -1,0 +1,583 @@
+{
+  "info": {
+    "name": "Sparky AI System",
+    "description": "Colección para pruebas de API del sistema Sparky AI para gestión de IA centralizada",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "description": "Endpoints para autenticación",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/signup",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "signup"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Admin User\",\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"COMPANY_ADMIN\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Gestión de Empresas (Super Admin)",
+      "description": "Endpoints para que el Super Admin de Sparky pueda gestionar empresas",
+      "item": [
+        {
+          "name": "Crear empresa",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/companies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "companies"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombreEmpresa\": \"Empresa Test\",\n    \"ruc\": \"12345678901\",\n    \"fechaAfiliacion\": \"2023-04-15\",\n    \"estado\": \"ACTIVO\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Listar todas las empresas",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/companies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "companies"]
+            }
+          }
+        },
+        {
+          "name": "Obtener empresa por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/companies/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "companies", "1"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar empresa",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/companies/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "companies", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"nombreEmpresa\": \"Empresa Actualizada\",\n    \"ruc\": \"12345678901\",\n    \"fechaAfiliacion\": \"2023-04-15\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Activar/desactivar empresa",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/companies/1/status?estado=INACTIVO",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "companies", "1", "status"],
+              "query": [
+                {
+                  "key": "estado",
+                  "value": "INACTIVO"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener consumo de empresa",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/admin/companies/1/consumption",
+              "host": ["{{base_url}}"],
+              "path": ["api", "admin", "companies", "1", "consumption"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Gestión de Restricciones (Admin Empresa)",
+      "description": "Endpoints para administradores de empresas para gestionar restricciones",
+      "item": [
+        {
+          "name": "Crear restricción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/company/restrictions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "company", "restrictions"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"modeloAI\": \"GPT-4\",\n    \"limiteUso\": 100,\n    \"ventanaTiempo\": \"DIARIO\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Listar restricciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/company/restrictions",
+              "host": ["{{base_url}}"],
+              "path": ["api", "company", "restrictions"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar restricción",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/company/restrictions/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "company", "restrictions", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"modeloAI\": \"GPT-4\",\n    \"limiteUso\": 150,\n    \"ventanaTiempo\": \"SEMANAL\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Eliminar restricción",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/company/restrictions/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "company", "restrictions", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Gestión de Usuarios (Admin Empresa)",
+      "description": "Endpoints para administradores de empresas para gestionar usuarios",
+      "item": [
+        {
+          "name": "Crear usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/company/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "company", "users"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Usuario Test\",\n    \"email\": \"usuario@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"USER\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/company/users",
+              "host": ["{{base_url}}"],
+              "path": ["api", "company", "users"]
+            }
+          }
+        },
+        {
+          "name": "Obtener usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/company/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "company", "users", "1"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/company/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "company", "users", "1"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Usuario Actualizado\",\n    \"email\": \"usuario.actualizado@example.com\",\n    \"role\": \"USER\",\n    \"enable\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Asignar límite a usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/company/users/1/limits",
+              "host": ["{{base_url}}"],
+              "path": ["api", "company", "users", "1", "limits"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "50"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Integración con Modelos de IA (Usuarios)",
+      "description": "Endpoints para usuarios finales para usar modelos de IA",
+      "item": [
+        {
+          "name": "Chat con IA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/ai/chat",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai", "chat"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "\"¿Cuáles son las mejores prácticas para implementar inteligencia artificial en una empresa?\""
+            }
+          }
+        },
+        {
+          "name": "Completado de texto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/ai/completion",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai", "completion"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"prompt\": \"Completa el siguiente texto: La inteligencia artificial es\",\n    \"maxTokens\": 50\n}"
+            }
+          }
+        },
+        {
+          "name": "Consulta multimodal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/ai/multimodal",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai", "multimodal"]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "prompt",
+                  "value": "¿Qué muestra esta imagen?",
+                  "type": "text"
+                },
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "/path/to/your/image.jpg"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obtener modelos disponibles",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/ai/models",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai", "models"]
+            }
+          }
+        },
+        {
+          "name": "Obtener historial de solicitudes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/ai/history",
+              "host": ["{{base_url}}"],
+              "path": ["api", "ai", "history"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Test Endpoints",
+      "description": "Endpoints para pruebas",
+      "item": [
+        {
+          "name": "Test User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/test/myuser",
+              "host": ["{{base_url}}"],
+              "path": ["test", "myuser"]
+            }
+          }
+        },
+        {
+          "name": "Test Admin Role",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/roles/admin",
+              "host": ["{{base_url}}"],
+              "path": ["roles", "admin"]
+            }
+          }
+        },
+        {
+          "name": "Test User Role",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/roles/user",
+              "host": ["{{base_url}}"],
+              "path": ["roles", "user"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "your_jwt_token_here",
+      "type": "string"
+    }
+  ]
+}
