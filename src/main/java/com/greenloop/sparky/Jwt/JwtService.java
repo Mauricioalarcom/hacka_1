@@ -18,8 +18,8 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-
-    private String jwtSigningKey = "6d40dc59fde0b52297331de7476c5f29d65f57a885d48f4c5090a2147c4c83ad97b0f2ef5342704ee7d1c4b70439acdaf0309b13559f14f138e0808b03cec804";
+    // no me permitia colocar las variables de entorno. Por consiguiente, tuve que ponerlo aca directamente
+    private String jwtSigningKey = "6d40dc59fde0b52297331de7476c5f29d65f57a885d48f4c5090a2147c4c83ad97b0f2ef5342704ee7d1c4b70439acdaf0309b13559f14f138e0808b03cec804"; 
 
     public String extractUserName(String token) {
         return extractClaim(token, Claims::getSubject);
